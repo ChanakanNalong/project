@@ -1,0 +1,2 @@
+android/java_pid6520.hprof filter=lfs diff=lfs merge=lfs -text
+*.hprof filter=lfs diff=lfs merge=lfs -text
