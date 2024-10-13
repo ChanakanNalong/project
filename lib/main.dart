@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'app_screen/login.dart';
+import 'app_screen/menu_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -8,14 +8,12 @@ void main() {
 // ส่วนของ Stateless widget
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Smart Spots Parking',
-      theme: ThemeData(
-        primarySwatch: Colors.blue
-      ),
+      title: 'First Flutter App',
       // home: FirstScreen(),
       initialRoute: '/menu', // สามารถใช้ home แทนได้
       routes: {
