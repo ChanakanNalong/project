@@ -1,5 +1,6 @@
 // TODO Implement this library.
 import 'dart:typed_data';
+import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 
@@ -12,7 +13,7 @@ class YoloWebSocketService {
   List<Map<String, dynamic>> yoloResults = [];
 
   Future<void> init(String websocketUrl) async {
-    channel = WebSocketChannel.connect(Uri.parse(websocketUrl));
+    channel = IOWebSocketChannel.connect(websocketUrl);
     vision = FlutterVision();
     await loadYoloModel();
     channel.stream.listen((data) {
