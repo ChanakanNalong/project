@@ -1,6 +1,46 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../ParkingPage/esp32cam.dart';
+import 'package:workmanager/workmanager.dart';
+import 'ParkingPage/cam_detect.dart';
+import 'yolo_service.dart';
+import 'package:http/http.dart' as http;
 import '../Graph/graph.dart'; // เปลี่ยนเป็น path ที่ถูกต้อง
+
+Future<void> sendToDatabase(data) async {
+  String url = "http://-your ip-/api/flutter_login/yolo_service.php";
+  await http.post(
+    Uri.parse(url),
+      headers: {
+        "Content-Type": "application/json"
+      }, 
+      body: json.encode(data));
+}
+
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    final yoloService = YoloWebSocketService();
+
+    // เรียกใช้ใน initState หรือฟังก์ชัน setup อื่นๆ
+    await yoloService.init('ws://172.16.10.249:81');
+
+    // เรียกใช้งาน YoloWebSocket และส่งข้อมูลขึ้นฐานข้อมูล
+    await yoloService.startDetection();
+
+    // จำนวนรถที่ detect ได้
+    int numberOfCars = yoloService.yoloResults.length;
+
+    // ส่งข้อมูลไปยังฐานข้อมูล (สมมติว่ามีฟังก์ชัน sendToDatabase)
+    await sendToDatabase(numberOfCars);
+
+    // หยุดการตรวจจับ
+    await yoloService.stopDetection();
+
+    // ปิดบริการเมื่อไม่ใช้งานแล้ว
+    await yoloService.dispose();
+
+    return Future.value(true);
+  });
+}
 
 // สร้างคลาสสำหรับที่จอดรถ
 class ParkingSpot {
@@ -24,6 +64,7 @@ class _HomepageState extends State<Homepage> {
     ParkingSpot('อาคาร 1', 20, 30),
     ParkingSpot('อาคาร 2', 15, 25),
     ParkingSpot('อาคาร 3', 5, 10),
+    ParkingSpot('อาคาร 4', 10, 20),
   ]; // รายการที่จอดรถ
   List<ParkingSpot> filteredParkingSpots = [];
 
@@ -144,20 +185,58 @@ class ParkingCard extends StatelessWidget {
             SizedBox(width: 16),
             Expanded(
               child: Text(
-                'ที่จอดรถ (${parkingSpot.name}) (${parkingSpot.available}/${parkingSpot.total})',
+                'ที่จอดรถ (${parkingSpot.name})', // ลบส่วน (${parkingSpot.available}/${parkingSpot.total}) ออก
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
+            // ปุ่มที่มีอยู่แล้ว
             TextButton(
               onPressed: () async {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChartPage(), // ใช้ GraphPage ที่คุณสร้างไว้
+                    builder: (context) => YoloWebSocket(), // ใช้ GraphPage ที่คุณสร้างไว้
                   ),
                 );
               },
               child: Text('ดูเพิ่มเติม'),
+            ),
+            // ปุ่มแสดงกราฟ
+            IconButton(
+              icon: Icon(Icons.show_chart, color: Colors.blue),
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChartPage(), // นำไปสู่หน้ากราฟที่คุณสร้างไว้
+                  ),
+                );
+              },
+            ),
+            // ปุ่มใหม่ที่เพิ่มขึ้นมา
+            IconButton(
+              icon: Icon(Icons.info_outline),
+              color: Colors.blue,
+              onPressed: () {
+                // แสดงข้อมูลที่จอดรถเพิ่มเติมใน Dialog
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('ข้อมูลที่จอดรถ'),
+                      content: Text('จอดรถได้ ${parkingSpot.available} จากทั้งหมด ${parkingSpot.total} ช่องจอด.'), // ข้อมูลยังคงมีอยู่
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('ปิด'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),
