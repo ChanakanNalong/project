@@ -1,4 +1,4 @@
-# flutter_student
+# flutter_project
 
 A new Flutter project.
 
