@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../ParkingPage/esp32cam.dart';
 import '../Graph/graph.dart'; // เปลี่ยนเป็น path ที่ถูกต้อง
 
 // สร้างคลาสสำหรับที่จอดรถ
@@ -144,10 +143,11 @@ class ParkingCard extends StatelessWidget {
             SizedBox(width: 16),
             Expanded(
               child: Text(
-                'ที่จอดรถ (${parkingSpot.name}) (${parkingSpot.available}/${parkingSpot.total})',
+                'ที่จอดรถ (${parkingSpot.name})', // ลบส่วน (${parkingSpot.available}/${parkingSpot.total}) ออก
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
+            // ปุ่มที่มีอยู่แล้ว
             TextButton(
               onPressed: () async {
                 Navigator.push(
@@ -158,6 +158,43 @@ class ParkingCard extends StatelessWidget {
                 );
               },
               child: Text('ดูเพิ่มเติม'),
+            ),
+            // ปุ่มแสดงกราฟ
+            IconButton(
+              icon: Icon(Icons.show_chart, color: Colors.blue),
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChartPage(), // นำไปสู่หน้ากราฟที่คุณสร้างไว้
+                  ),
+                );
+              },
+            ),
+            // ปุ่มใหม่ที่เพิ่มขึ้นมา
+            IconButton(
+              icon: Icon(Icons.info_outline),
+              color: Colors.blue,
+              onPressed: () {
+                // แสดงข้อมูลที่จอดรถเพิ่มเติมใน Dialog
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('ข้อมูลที่จอดรถ'),
+                      content: Text('จอดรถได้ ${parkingSpot.available} จากทั้งหมด ${parkingSpot.total} ช่องจอด.'), // ข้อมูลยังคงมีอยู่
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('ปิด'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),

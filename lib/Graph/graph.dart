@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 Future<List<DataPoint>> fetchData() async {
-  final response = await http.get(Uri.parse('http://172.16.10.250/api/flutter_login/graph.php'));
+  final response = await http.get(Uri.parse('http://172.16.10.252/api/flutter_login/graph.php'));
 
   print(response.body); // เพิ่มบรรทัดนี้เพื่อตรวจสอบข้อมูลที่ได้รับ
 
